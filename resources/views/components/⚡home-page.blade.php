@@ -33,6 +33,13 @@ new class extends Component
             ->orderBy('start_time', 'asc')
             ->take(5)
             ->get();
+
+        if ($this->minister && $this->minister->photo_path) {
+            $path = $this->minister->photo_path;
+            if (!Storage::exists($path) && Storage::disk('local')->exists($path)) {
+                Storage::disk('public')->put($path, Storage::disk('local')->get($path));
+            }
+        }
     }
 
     public function submitBooking()
@@ -69,7 +76,7 @@ new class extends Component
                 </p>
             </div>
             <div class="md:w-1/2 flex justify-center">
-                @if($minister && $minister->photo_path)
+                @if($minister && $minister->photo_path && Storage::exists($minister->photo_path))
                     <img src="{{ Storage::url($minister->photo_path) }}" alt="{{ $minister->name }}" class="rounded-full w-64 h-64 object-cover border-4 border-white shadow-lg">
                 @else
                     <div class="rounded-full w-64 h-64 bg-blue-400 flex items-center justify-center border-4 border-white shadow-lg">
