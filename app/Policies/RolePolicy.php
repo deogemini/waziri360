@@ -14,57 +14,57 @@ class RolePolicy
     
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function view(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('View:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function update(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('Update:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function delete(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('Delete:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function restore(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('Restore:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function forceDelete(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('ForceDelete:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function replicate(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('Replicate:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
     public function reorder(AuthUser $authUser): bool
     {
-        return $authUser->can('Reorder:Role');
+        return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
 
 }

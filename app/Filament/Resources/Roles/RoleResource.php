@@ -1,47 +1,41 @@
 <?php
 
-namespace App\Filament\Resources\MinisterProfiles;
+namespace App\Filament\Resources\Roles;
 
-use App\Filament\Resources\MinisterProfiles\Pages\ManageMinisterProfiles;
-use App\Models\MinisterProfile;
+use App\Filament\Resources\Roles\Pages\ManageRoles;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Spatie\Permission\Models\Role;
 
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Columns\ImageColumn;
-
-class MinisterProfileResource extends Resource
+class RoleResource extends Resource
 {
-    protected static ?string $model = MinisterProfile::class;
+    protected static ?string $model = Role::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
-                TextInput::make('title')
-                    ->required(),
-                FileUpload::make('photo_path')
-                    ->image()
-                    ->disk('public')
-                    ->directory('minister-profile')
-                    ->default(null),
-                Textarea::make('bio')
-                    ->default(null)
-                    ->columnSpanFull(),
+                    ->required()
+                    ->unique(ignoreRecord: true),
+                TextInput::make('guard_name')
+                    ->default('web'),
+                Select::make('permissions')
+                    ->relationship('permissions', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable(),
             ]);
     }
 
@@ -49,19 +43,20 @@ class MinisterProfileResource extends Resource
     {
         return $table
             ->columns([
-                ImageColumn::make('photo_path')
-                    ->circular(),
                 TextColumn::make('name')
                     ->searchable(),
-                TextColumn::make('title')
+                TextColumn::make('permissions.name')
+                    ->badge()
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -77,7 +72,7 @@ class MinisterProfileResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManageMinisterProfiles::route('/'),
+            'index' => ManageRoles::route('/'),
         ];
     }
 }

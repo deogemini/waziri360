@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Booking;
 use Filament\Notifications\Notification;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component
 {
@@ -69,7 +70,7 @@ new class extends Component
             </div>
             <div class="md:w-1/2 flex justify-center">
                 @if($minister && $minister->photo_path)
-                    <img src="{{ asset('storage/' . $minister->photo_path) }}" alt="{{ $minister->name }}" class="rounded-full w-64 h-64 object-cover border-4 border-white shadow-lg">
+                    <img src="{{ Storage::url($minister->photo_path) }}" alt="{{ $minister->name }}" class="rounded-full w-64 h-64 object-cover border-4 border-white shadow-lg">
                 @else
                     <div class="rounded-full w-64 h-64 bg-blue-400 flex items-center justify-center border-4 border-white shadow-lg">
                         <span class="text-6xl">👤</span>
@@ -82,7 +83,7 @@ new class extends Component
     <!-- Content Grid -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            
+
             <!-- Calendar / Availability Section -->
             <div id="calendar">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Upcoming Public Engagements</h2>
@@ -100,7 +101,7 @@ new class extends Component
                                             <h3 class="text-lg font-semibold text-gray-900">{{ $event->title }}</h3>
                                             <p class="text-gray-500">{{ $event->start_time->format('h:i A') }} - {{ $event->end_time->format('h:i A') }}</p>
                                             <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full mt-1
-                                                {{ $event->category->type === 'official' ? 'bg-blue-100 text-blue-800' : 
+                                                {{ $event->category->type === 'official' ? 'bg-blue-100 text-blue-800' :
                                                    ($event->category->type === 'urgent' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800') }}">
                                                 {{ ucfirst($event->category->name) }}
                                             </span>
