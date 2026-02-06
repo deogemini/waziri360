@@ -112,6 +112,41 @@ class BookingResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    \Filament\Tables\Actions\BulkAction::make('syncToCalendar')
+                        ->label('Add to Calendar')
+                        ->icon('heroicon-o-calendar')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            foreach ($records as $booking) {
+                                if ($booking->status !== 'approved') continue;
+
+                                $exists = \App\Models\Event::where('start_time', $booking->requested_date)
+                                    ->where('title', 'Meeting: ' . $booking->name)
+                                    ->exists();
+
+                                if ($exists) continue;
+
+                                $category = \App\Models\Category::firstOrCreate(
+                                    ['name' => 'Appointments'],
+                                    ['color' => '#10b981', 'type' => 'event']
+                                );
+
+                                \App\Models\Event::create([
+                                    'title' => 'Meeting: ' . $booking->name,
+                                    'description' => $booking->purpose . "\n\nContact: " . $booking->phone . " | " . $booking->email,
+                                    'start_time' => $booking->requested_date,
+                                    'end_time' => $booking->requested_date->copy()->addHour(),
+                                    'category_id' => $category->id,
+                                    'location' => 'Minister Office',
+                                ]);
+                            }
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Synced to Calendar')
+                                ->success()
+                                ->send();
+                        }),
                 ]),
             ]);
     }
