@@ -159,6 +159,9 @@ class CalendarWidget extends Widget implements HasForms, HasActions
     {
         return ViewAction::make('viewEvent')
             ->model(Event::class)
+            ->record(function (array $arguments) {
+                return Event::find($arguments['id'] ?? null);
+            })
             ->form([
                 Forms\Components\TextInput::make('title'),
                 Forms\Components\Textarea::make('description'),
