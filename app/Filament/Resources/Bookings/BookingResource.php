@@ -92,6 +92,20 @@ class BookingResource extends Resource
                 //
             ])
             ->recordActions([
+                Action::make('approve')
+                    ->label('Approve')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn (Booking $record) => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->action(fn (Booking $record) => $record->update(['status' => 'approved'])),
+                Action::make('reject')
+                    ->label('Reject')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn (Booking $record) => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->action(fn (Booking $record) => $record->update(['status' => 'rejected'])),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
