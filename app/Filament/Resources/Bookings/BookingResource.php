@@ -112,7 +112,7 @@ class BookingResource extends Resource
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    \Filament\Tables\Actions\BulkAction::make('syncToCalendar')
+                    \Filament\Actions\BulkAction::make('syncToCalendar')
                         ->label('Add to Calendar')
                         ->icon('heroicon-o-calendar')
                         ->color('success')
