@@ -15,6 +15,9 @@ class Event extends Model
         'location',
         'is_recurring',
         'recurrence_pattern',
+        'successes',
+        'challenges',
+        'next_steps',
     ];
 
     protected $casts = [
@@ -33,5 +36,20 @@ class Event extends Model
         return $this->belongsToMany(User::class, 'event_user')
             ->withPivot('status')
             ->withTimestamps();
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(EventDocument::class);
+    }
+
+    public function deliverables()
+    {
+        return $this->hasMany(Deliverable::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'event_tag')->withTimestamps();
     }
 }

@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Tag;
+use App\Models\Setting;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,10 +19,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'role' => 'admin',
-        ]);
+        User::query()->firstOrCreate(
+            ['email' => 'admin@example.com'],
+            ['name' => 'Admin User', 'role' => 'admin', 'password' => bcrypt('password')]
+        );
+
+        Tag::query()->firstOrCreate(['name' => 'Education']);
+        Tag::query()->firstOrCreate(['name' => 'Health']);
+        Tag::query()->firstOrCreate(['name' => 'Infrastructure']);
+
+        Setting::query()->firstOrCreate(
+            ['id' => 1],
+            ['audit_enabled' => false, 'retention_days' => 90]
+        );
     }
 }

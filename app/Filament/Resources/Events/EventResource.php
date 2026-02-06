@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -77,6 +78,66 @@ class EventResource extends Resource
                             ->preload()
                             ->label('Select Attendees'),
                     ]),
+
+                Section::make('Documents')
+                    ->schema([
+                        Repeater::make('documents')
+                            ->relationship('documents')
+                            ->schema([
+                                Select::make('type')
+                                    ->options([
+                                        'photo' => 'Photo',
+                                        'minutes' => 'Minutes',
+                                        'presentation' => 'Presentation',
+                                    ])
+                                    ->required(),
+                                FileUpload::make('path')
+                                    ->disk('public')
+                                    ->directory('event_documents')
+                                    ->preserveFilenames()
+                                    ->required(),
+                            ])
+                            ->addActionLabel('Add Document')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Deliverables')
+                    ->schema([
+                        Repeater::make('deliverables')
+                            ->relationship('deliverables')
+                            ->schema([
+                                TextInput::make('title')
+                                    ->required(),
+                                Textarea::make('description'),
+                                DateTimePicker::make('due_date'),
+                                Select::make('status')
+                                    ->options([
+                                        'pending' => 'Pending',
+                                        'completed' => 'Completed',
+                                        'at_risk' => 'At Risk',
+                                    ])
+                                    ->required(),
+                            ])
+                            ->addActionLabel('Add Deliverable')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Themes')
+                    ->schema([
+                        Select::make('tags')
+                            ->relationship('tags', 'name')
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->label('Event Themes'),
+                    ]),
+
+                Section::make('Summary')
+                    ->schema([
+                        Textarea::make('successes')->label('Successes'),
+                        Textarea::make('challenges')->label('Challenges'),
+                        Textarea::make('next_steps')->label('Next Steps'),
+                    ])->columns(3),
             ]);
     }
 
@@ -116,6 +177,34 @@ class EventResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('summary_report')
+                    ->label('Summary')
+                    ->icon('heroicon-o-document-text')
+                    ->action(function (Event $record) {
+                        $deliverablesTotal = $record->deliverables()->count();
+                        $deliverablesCompleted = $record->deliverables()->where('status', 'completed')->count();
+                        $tags = $record->tags()->pluck('name')->implode(', ');
+                        $attendees = $record->attendees()->pluck('name')->implode(', ');
+                        $html = '<html><head><meta charset="UTF-8"><title>Event Summary</title></head><body>';
+                        $html .= '<h1>' . e($record->title) . '</h1>';
+                        $html .= '<p><strong>Category:</strong> ' . e($record->category->name) . '</p>';
+                        $html .= '<p><strong>Themes:</strong> ' . e($tags) . '</p>';
+                        $html .= '<p><strong>Location:</strong> ' . e($record->location) . '</p>';
+                        $html .= '<p><strong>Schedule:</strong> ' . $record->start_time->toDateTimeString() . ' — ' . $record->end_time->toDateTimeString() . '</p>';
+                        $html .= '<p><strong>Attendees:</strong> ' . e($attendees) . '</p>';
+                        $html .= '<h2>Deliverables</h2>';
+                        $html .= '<p>' . $deliverablesCompleted . ' of ' . $deliverablesTotal . ' completed</p>';
+                        $html .= '<h2>Successes</h2><p>' . nl2br(e($record->successes)) . '</p>';
+                        $html .= '<h2>Challenges</h2><p>' . nl2br(e($record->challenges)) . '</p>';
+                        $html .= '<h2>Next Steps</h2><p>' . nl2br(e($record->next_steps)) . '</p>';
+                        $html .= '</body></html>';
+                        $response = new StreamedResponse(function () use ($html) {
+                            echo $html;
+                        });
+                        $response->headers->set('Content-Type', 'text/html; charset=UTF-8');
+                        $response->headers->set('Content-Disposition', 'attachment; filename="event_summary.html"');
+                        return $response;
+                    }),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
