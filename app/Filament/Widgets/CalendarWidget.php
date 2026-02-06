@@ -172,4 +172,94 @@ class CalendarWidget extends Widget implements HasForms, HasActions
                     ->relationship('category', 'name'),
             ]);
     }
+
+    public function downloadSampleAction(): Action
+    {
+        return Action::make('downloadSample')
+            ->label('Download Sample CSV')
+            ->color('gray')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->link()
+            ->action(function () {
+                $headers = ['Title', 'Description', 'Start Time', 'End Time', 'Category', 'Location'];
+                $data = [
+                    ['Team Meeting', 'Discuss weekly progress', '2024-01-01 10:00', '2024-01-01 11:00', 'Internal', 'Conference Room A'],
+                    ['Client Call', 'Project kickoff', '2024-01-02 14:00', '2024-01-02 15:00', 'External', 'Zoom'],
+                ];
+
+                $callback = function () use ($headers, $data) {
+                    $file = fopen('php://output', 'w');
+                    fputcsv($file, $headers);
+                    foreach ($data as $row) {
+                        fputcsv($file, $row);
+                    }
+                    fclose($file);
+                };
+
+                return response()->streamDownload($callback, 'events_sample.csv');
+            });
+    }
+
+    public function importEventsAction(): Action
+    {
+        return Action::make('importEvents')
+            ->label('Import Events')
+            ->color('success')
+            ->icon('heroicon-o-arrow-up-tray')
+            ->form([
+                Forms\Components\FileUpload::make('attachment')
+                    ->label('Upload CSV File')
+                    ->acceptedFileTypes(['text/csv', 'text/plain', 'application/vnd.ms-excel'])
+                    ->required()
+                    ->disk('public')
+                    ->directory('temp_imports')
+                    ->helperText('Upload a CSV file. Click "Download Sample CSV" below to see the format.'),
+            ])
+            ->extraModalFooterActions([
+                $this->downloadSampleAction(),
+            ])
+            ->action(function (array $data) {
+                $file = $data['attachment'];
+                $path = \Illuminate\Support\Facades\Storage::disk('public')->path($file);
+
+                if (($handle = fopen($path, "r")) !== FALSE) {
+                    // Skip header
+                    fgetcsv($handle, 1000, ",");
+                    
+                    while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        // Expected: Title, Description, Start Time, End Time, Category, Location
+                        if (count($row) < 5) continue; 
+                        
+                        $categoryName = $row[4] ?? 'General';
+                        $category = \App\Models\Category::firstOrCreate(
+                            ['name' => $categoryName],
+                            ['color' => '#6b7280', 'type' => 'event']
+                        );
+
+                        try {
+                            Event::create([
+                                'title' => $row[0],
+                                'description' => $row[1] ?? null,
+                                'start_time' => Carbon::parse($row[2]),
+                                'end_time' => Carbon::parse($row[3]),
+                                'category_id' => $category->id,
+                                'location' => $row[5] ?? null,
+                            ]);
+                        } catch (\Exception $e) {
+                            // Skip invalid rows or log them
+                            continue;
+                        }
+                    }
+                    fclose($handle);
+                }
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Events imported successfully')
+                    ->success()
+                    ->send();
+                
+                // Cleanup
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($file);
+            });
+    }
 }

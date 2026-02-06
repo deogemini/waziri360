@@ -67,6 +67,9 @@
             </div>
             
             <div class="fc-actions">
+                <x-filament::button color="success" size="sm" wire:click="mountAction('importEvents')">
+                    Import
+                </x-filament::button>
                 <x-filament::button color="gray" size="sm" wire:click="previous">
                     Previous
                 </x-filament::button>
