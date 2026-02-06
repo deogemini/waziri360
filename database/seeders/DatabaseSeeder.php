@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Tag;
 use App\Models\Setting;
+use App\Models\User as ModelsUser;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -31,6 +32,11 @@ class DatabaseSeeder extends Seeder
         Setting::query()->firstOrCreate(
             ['id' => 1],
             ['audit_enabled' => false, 'retention_days' => 90]
+        );
+
+        ModelsUser::query()->firstOrCreate(
+            ['email' => 'deputy@example.com'],
+            ['name' => 'Deputy User', 'role' => 'deputy', 'password' => bcrypt('password')]
         );
     }
 }
