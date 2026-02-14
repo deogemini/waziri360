@@ -39,7 +39,9 @@ class DeliverableResource extends Resource
                         'kinga_ya_jamii' => 'Kinga ya Jamii',
                     ])
                     ->native(false),
-                DateTimePicker::make('due_date'),
+                DateTimePicker::make('due_date')
+                    ->label('Due date')
+                    ->required(),
                 Select::make('status')
                     ->options([
                         'pending' => 'Pending',

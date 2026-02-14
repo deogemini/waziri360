@@ -116,7 +116,9 @@ class EventResource extends Resource
                                 TextInput::make('title')
                                     ->required(),
                                 Textarea::make('description'),
-                                DateTimePicker::make('due_date'),
+                                DateTimePicker::make('due_date')
+                                    ->label('Due date')
+                                    ->required(),
                                 Select::make('status')
                                     ->options([
                                         'pending' => 'Pending',
