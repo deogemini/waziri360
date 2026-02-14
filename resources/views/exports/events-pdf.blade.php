@@ -27,26 +27,22 @@
         <thead>
             <tr>
                 <th>SN</th>
-                <th>Title</th>
-                <th>Description</th>
                 <th>Start</th>
                 <th>End</th>
+                <th>Title</th>
+                <th>Description</th>
                 <th>Location</th>
-                <th>Attendees</th>
-                <th>Category</th>
             </tr>
         </thead>
         <tbody>
             @foreach($events as $event)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $event->title }}</td>
-                    <td>{{ $event->description }}</td>
                     <td>{{ $event->start_time?->format('Y-m-d H:i') }}</td>
                     <td>{{ $event->end_time?->format('Y-m-d H:i') }}</td>
+                    <td>{{ $event->title }}</td>
+                    <td>{{ $event->description }}</td>
                     <td>{{ $event->location }}</td>
-                    <td>{{ $event->attendees?->count() }}</td>
-                    <td>{{ $event->category?->name }}</td>
                 </tr>
             @endforeach
         </tbody>
