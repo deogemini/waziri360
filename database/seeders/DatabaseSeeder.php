@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Models\User as ModelsUser;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\TagSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,9 +26,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Admin User', 'role' => 'admin', 'password' => bcrypt('password')]
         );
 
-        Tag::query()->firstOrCreate(['name' => 'Education']);
-        Tag::query()->firstOrCreate(['name' => 'Health']);
-        Tag::query()->firstOrCreate(['name' => 'Infrastructure']);
+        $this->call(TagSeeder::class);
 
         Setting::query()->firstOrCreate(
             ['id' => 1],
