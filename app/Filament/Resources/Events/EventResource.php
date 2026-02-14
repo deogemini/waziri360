@@ -24,12 +24,15 @@ use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Dompdf\Dompdf;
 use Illuminate\Support\Facades\View;
 use App\Models\MinisterProfile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 
 class EventResource extends Resource
 {
@@ -182,7 +185,17 @@ class EventResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                //
+                Filter::make('date_range')
+                    ->label('Date range')
+                    ->form([
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('until')->label('To'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'] ?? null, fn ($q, $date) => $q->where('start_time', '>=', Carbon::parse($date)->startOfDay()))
+                            ->when($data['until'] ?? null, fn ($q, $date) => $q->where('end_time', '<=', Carbon::parse($date)->endOfDay()));
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),
