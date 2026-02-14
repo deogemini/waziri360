@@ -153,18 +153,11 @@ class EventResource extends Resource
                     ->label('SN')
                     ->rowIndex(),
                 TextColumn::make('title')
-                    ->searchable()
-                    ->description(fn (Event $record) => $record->category->name)
-                    ->tooltip(fn (Event $record) => $record->description),
-                TextColumn::make('category.name')
-                    ->badge()
-                    ->color(fn ($record) => match ($record->category->type) {
-                        'official' => 'info',
-                        'social' => 'success',
-                        'urgent' => 'danger',
-                        default => 'gray',
-                    })
                     ->searchable(),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->limit(60)
+                    ->wrap(),
                 TextColumn::make('start_time')
                     ->dateTime()
                     ->sortable(),
@@ -178,6 +171,15 @@ class EventResource extends Resource
                 TextColumn::make('attendees_count')
                     ->counts('attendees')
                     ->label('Attendees'),
+                TextColumn::make('category.name')
+                    ->badge()
+                    ->color(fn ($record) => match ($record->category->type) {
+                        'official' => 'info',
+                        'social' => 'success',
+                        'urgent' => 'danger',
+                        default => 'gray',
+                    })
+                    ->searchable(),
             ])
             ->filters([
                 //
