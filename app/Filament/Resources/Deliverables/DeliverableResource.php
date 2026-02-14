@@ -30,6 +30,15 @@ class DeliverableResource extends Resource
             ->components([
                 TextInput::make('title')->required(),
                 Textarea::make('description')->columnSpanFull(),
+                Select::make('theme')
+                    ->label('Theme')
+                    ->options([
+                        'kazi' => 'Kazi',
+                        'ajira' => 'Ajira',
+                        'mahusiano' => 'Mahusiano',
+                        'kinga_ya_jamii' => 'Kinga ya Jamii',
+                    ])
+                    ->native(false),
                 DateTimePicker::make('due_date'),
                 Select::make('status')
                     ->options([
