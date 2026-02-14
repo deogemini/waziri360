@@ -51,9 +51,12 @@ class DeliverableResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')
-                    ->searchable()
-                    ->limit(40),
+                TextColumn::make('sn')
+                    ->label('SN')
+                    ->rowIndex(),
+                // TextColumn::make('title')
+                //     ->searchable()
+                //     ->limit(40),
                 TextColumn::make('description')
                     ->label('Description')
                     ->limit(60)
