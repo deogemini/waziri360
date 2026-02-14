@@ -205,13 +205,6 @@ class EventResource extends Resource
                             'ministerPhotoUrl' => $photoUrl,
                         ])->render();
 
-                        if (!class_exists('Dompdf\\Dompdf')) {
-                            return response($html, 200, [
-                                'Content-Type' => 'text/html; charset=UTF-8',
-                                'Content-Disposition' => 'attachment; filename=\"event_'.$record->id.'.html\"',
-                            ]);
-                        }
-
                         $dompdf = class_exists('Dompdf\\Options')
                             ? new Dompdf(tap(new \Dompdf\Options(), function ($o) { $o->set('isRemoteEnabled', true); }))
                             : new Dompdf();
@@ -223,7 +216,7 @@ class EventResource extends Resource
                         $dompdf->render();
                         return response($dompdf->output(), 200, [
                             'Content-Type' => 'application/pdf',
-                            'Content-Disposition' => 'attachment; filename=\"event_'.$record->id.'.pdf\"',
+                            'Content-Disposition' => 'attachment; filename=event_'.$record->id.'.pdf',
                         ]);
                     }),
                 Action::make('summary_report')
@@ -312,13 +305,6 @@ class EventResource extends Resource
                             'ministerPhotoUrl' => $photoUrl,
                         ])->render();
 
-                        if (!class_exists('Dompdf\\Dompdf')) {
-                            return response($html, 200, [
-                                'Content-Type' => 'text/html; charset=UTF-8',
-                                'Content-Disposition' => 'attachment; filename=\"events.html\"',
-                            ]);
-                        }
-
                         $dompdf = class_exists('Dompdf\\Options')
                             ? new Dompdf(tap(new \Dompdf\Options(), function ($o) { $o->set('isRemoteEnabled', true); }))
                             : new Dompdf();
@@ -330,7 +316,7 @@ class EventResource extends Resource
                         $dompdf->render();
                         return response($dompdf->output(), 200, [
                             'Content-Type' => 'application/pdf',
-                            'Content-Disposition' => 'attachment; filename=\"events.pdf\"',
+                            'Content-Disposition' => 'attachment; filename=events.pdf',
                         ]);
                     }),
                 BulkActionGroup::make([

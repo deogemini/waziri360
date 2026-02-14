@@ -54,6 +54,10 @@ class DeliverableResource extends Resource
                 TextColumn::make('title')
                     ->searchable()
                     ->limit(40),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->limit(60)
+                    ->wrap(),
                 TextColumn::make('event.title')
                     ->label('Event')
                     ->searchable()
