@@ -149,6 +149,9 @@ class EventResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('sn')
+                    ->label('SN')
+                    ->rowIndex(),
                 TextColumn::make('title')
                     ->searchable()
                     ->description(fn (Event $record) => $record->category->name)
@@ -197,7 +200,28 @@ class EventResource extends Resource
                                 $photoPath = $privateAbsolute;
                             }
                         }
-                        $photoUrl = $photoPath ? ('file:///' . str_replace('\\', '/', $photoPath)) : null;
+                        $photoUrl = null;
+                        if ($photoPath) {
+                            $mime = null;
+                            if (function_exists('mime_content_type')) {
+                                $mime = @mime_content_type($photoPath) ?: null;
+                            }
+                            if (!$mime) {
+                                $ext = strtolower(pathinfo($photoPath, PATHINFO_EXTENSION));
+                                $mime = match ($ext) {
+                                    'png' => 'image/png',
+                                    'gif' => 'image/gif',
+                                    'webp' => 'image/webp',
+                                    default => 'image/jpeg',
+                                };
+                            }
+                            $data = @file_get_contents($photoPath);
+                            if ($data !== false) {
+                                $photoUrl = 'data:' . $mime . ';base64,' . base64_encode($data);
+                            } else {
+                                $photoUrl = 'file:///' . str_replace('\\', '/', $photoPath);
+                            }
+                        }
 
                         $html = View::make('exports.event-summary-pdf', [
                             'event' => $record,
@@ -214,10 +238,15 @@ class EventResource extends Resource
                         $dompdf->loadHtml($html);
                         $dompdf->setPaper('a4', 'portrait');
                         $dompdf->render();
-                        return response($dompdf->output(), 200, [
-                            'Content-Type' => 'application/pdf',
-                            'Content-Disposition' => 'attachment; filename=event_'.$record->id.'.pdf',
-                        ]);
+                        return response()->streamDownload(
+                            function () use ($dompdf) {
+                                echo $dompdf->output();
+                            },
+                            'event_'.$record->id.'.pdf',
+                            [
+                                'Content-Type' => 'application/pdf',
+                            ]
+                        );
                     }),
                 Action::make('summary_report')
                     ->label('Summary')
@@ -297,7 +326,28 @@ class EventResource extends Resource
                                 $photoPath = $privateAbsolute;
                             }
                         }
-                        $photoUrl = $photoPath ? ('file:///' . str_replace('\\', '/', $photoPath)) : null;
+                        $photoUrl = null;
+                        if ($photoPath) {
+                            $mime = null;
+                            if (function_exists('mime_content_type')) {
+                                $mime = @mime_content_type($photoPath) ?: null;
+                            }
+                            if (!$mime) {
+                                $ext = strtolower(pathinfo($photoPath, PATHINFO_EXTENSION));
+                                $mime = match ($ext) {
+                                    'png' => 'image/png',
+                                    'gif' => 'image/gif',
+                                    'webp' => 'image/webp',
+                                    default => 'image/jpeg',
+                                };
+                            }
+                            $data = @file_get_contents($photoPath);
+                            if ($data !== false) {
+                                $photoUrl = 'data:' . $mime . ';base64,' . base64_encode($data);
+                            } else {
+                                $photoUrl = 'file:///' . str_replace('\\', '/', $photoPath);
+                            }
+                        }
 
                         $html = View::make('exports.events-pdf', [
                             'events' => $events,
@@ -314,10 +364,15 @@ class EventResource extends Resource
                         $dompdf->loadHtml($html);
                         $dompdf->setPaper('a4', 'portrait');
                         $dompdf->render();
-                        return response($dompdf->output(), 200, [
-                            'Content-Type' => 'application/pdf',
-                            'Content-Disposition' => 'attachment; filename=events.pdf',
-                        ]);
+                        return response()->streamDownload(
+                            function () use ($dompdf) {
+                                echo $dompdf->output();
+                            },
+                            'events.pdf',
+                            [
+                                'Content-Type' => 'application/pdf',
+                            ]
+                        );
                     }),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

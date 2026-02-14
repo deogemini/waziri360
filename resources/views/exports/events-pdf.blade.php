@@ -26,6 +26,7 @@
     <table>
         <thead>
             <tr>
+                <th>SN</th>
                 <th>Title</th>
                 <th>Category</th>
                 <th>Start</th>
@@ -37,6 +38,7 @@
         <tbody>
             @foreach($events as $event)
                 <tr>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $event->title }}</td>
                     <td>{{ $event->category?->name }}</td>
                     <td>{{ $event->start_time?->format('Y-m-d H:i') }}</td>
