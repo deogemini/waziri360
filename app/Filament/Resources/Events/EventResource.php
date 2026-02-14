@@ -26,6 +26,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Dompdf\Dompdf;
+use Illuminate\Support\Facades\View;
+use App\Models\MinisterProfile;
+use Illuminate\Support\Facades\Storage;
 
 class EventResource extends Resource
 {
@@ -177,6 +181,51 @@ class EventResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('export_pdf_record')
+                    ->label('Export PDF')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (Event $record) {
+                        $minister = MinisterProfile::first();
+                        $photoPath = null;
+                        if ($minister && $minister->photo_path) {
+                            $relative = ltrim($minister->photo_path, '\\/');
+                            $publicAbsolute = storage_path('app/public/' . $relative);
+                            $privateAbsolute = storage_path('app/private/' . $relative);
+                            if (is_file($publicAbsolute)) {
+                                $photoPath = $publicAbsolute;
+                            } elseif (is_file($privateAbsolute)) {
+                                $photoPath = $privateAbsolute;
+                            }
+                        }
+                        $photoUrl = $photoPath ? ('file:///' . str_replace('\\', '/', $photoPath)) : null;
+
+                        $html = View::make('exports.event-summary-pdf', [
+                            'event' => $record,
+                            'minister' => $minister,
+                            'ministerPhotoUrl' => $photoUrl,
+                        ])->render();
+
+                        if (!class_exists('Dompdf\\Dompdf')) {
+                            return response($html, 200, [
+                                'Content-Type' => 'text/html; charset=UTF-8',
+                                'Content-Disposition' => 'attachment; filename=\"event_'.$record->id.'.html\"',
+                            ]);
+                        }
+
+                        $dompdf = class_exists('Dompdf\\Options')
+                            ? new Dompdf(tap(new \Dompdf\Options(), function ($o) { $o->set('isRemoteEnabled', true); }))
+                            : new Dompdf();
+                        if (method_exists($dompdf, 'set_option')) {
+                            $dompdf->set_option('isRemoteEnabled', true);
+                        }
+                        $dompdf->loadHtml($html);
+                        $dompdf->setPaper('a4', 'portrait');
+                        $dompdf->render();
+                        return response($dompdf->output(), 200, [
+                            'Content-Type' => 'application/pdf',
+                            'Content-Disposition' => 'attachment; filename=\"event_'.$record->id.'.pdf\"',
+                        ]);
+                    }),
                 Action::make('summary_report')
                     ->label('Summary')
                     ->icon('heroicon-o-document-text')
@@ -237,6 +286,52 @@ class EventResource extends Resource
                         $response->headers->set('Content-Disposition', 'attachment; filename="events_export.csv"');
 
                         return $response;
+                    }),
+                Action::make('export_pdf')
+                    ->label('Export PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function () {
+                        $events = Event::with(['category', 'attendees'])->orderBy('start_time')->get();
+                        $minister = MinisterProfile::first();
+                        $photoPath = null;
+                        if ($minister && $minister->photo_path) {
+                            $relative = ltrim($minister->photo_path, '\\/');
+                            $publicAbsolute = storage_path('app/public/' . $relative);
+                            $privateAbsolute = storage_path('app/private/' . $relative);
+                            if (is_file($publicAbsolute)) {
+                                $photoPath = $publicAbsolute;
+                            } elseif (is_file($privateAbsolute)) {
+                                $photoPath = $privateAbsolute;
+                            }
+                        }
+                        $photoUrl = $photoPath ? ('file:///' . str_replace('\\', '/', $photoPath)) : null;
+
+                        $html = View::make('exports.events-pdf', [
+                            'events' => $events,
+                            'minister' => $minister,
+                            'ministerPhotoUrl' => $photoUrl,
+                        ])->render();
+
+                        if (!class_exists('Dompdf\\Dompdf')) {
+                            return response($html, 200, [
+                                'Content-Type' => 'text/html; charset=UTF-8',
+                                'Content-Disposition' => 'attachment; filename=\"events.html\"',
+                            ]);
+                        }
+
+                        $dompdf = class_exists('Dompdf\\Options')
+                            ? new Dompdf(tap(new \Dompdf\Options(), function ($o) { $o->set('isRemoteEnabled', true); }))
+                            : new Dompdf();
+                        if (method_exists($dompdf, 'set_option')) {
+                            $dompdf->set_option('isRemoteEnabled', true);
+                        }
+                        $dompdf->loadHtml($html);
+                        $dompdf->setPaper('a4', 'portrait');
+                        $dompdf->render();
+                        return response($dompdf->output(), 200, [
+                            'Content-Type' => 'application/pdf',
+                            'Content-Disposition' => 'attachment; filename=\"events.pdf\"',
+                        ]);
                     }),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
