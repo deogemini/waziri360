@@ -28,7 +28,7 @@
     <h1>{{ $event->title }}</h1>
     <div class="meta">
         <p><strong>Category:</strong> {{ $event->category?->name }}</p>
-        <p><strong>Schedule:</strong> {{ $event->start_time?->format('Y-m-d H:i') }} — {{ $event->end_time?->format('Y-m-d H:i') }}</p>
+        <p><strong>Schedule:</strong> {{ $event->start_time?->format('j/n/Y g:i:s A') }} — {{ $event->end_time?->format('j/n/Y g:i:s A') }}</p>
         <p><strong>Location:</strong> {{ $event->location }}</p>
         <p><strong>Attendees:</strong> {{ $event->attendees?->pluck('name')->implode(', ') }}</p>
     </div>
@@ -48,7 +48,7 @@
                 <tr>
                     <td>{{ $d->title }}</td>
                     <td>{{ ucfirst($d->status) }}</td>
-                    <td>{{ optional($d->due_date)->format('Y-m-d H:i') }}</td>
+                    <td>{{ optional($d->due_date)->format('j/n/Y g:i:s A') }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -57,6 +57,6 @@
     <p><strong>Successes:</strong> {{ $event->successes }}</p>
     <p><strong>Challenges:</strong> {{ $event->challenges }}</p>
     <p><strong>Next Steps:</strong> {{ $event->next_steps }}</p>
-    <p class="muted">Generated on {{ now()->format('Y-m-d H:i') }}</p>
+    <p class="muted">Generated on {{ now()->format('j/n/Y g:i:s A') }}</p>
 </body>
 </html>

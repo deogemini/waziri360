@@ -38,8 +38,8 @@
             @foreach($events as $event)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $event->start_time?->format('Y-m-d H:i') }}</td>
-                    <td>{{ $event->end_time?->format('Y-m-d H:i') }}</td>
+                    <td>{{ $event->start_time?->format('j/n/Y g:i:s A') }}</td>
+                    <td>{{ $event->end_time?->format('j/n/Y g:i:s A') }}</td>
                     <td>{{ $event->title }}</td>
                     <td>{{ $event->description }}</td>
                     <td>{{ $event->location }}</td>
@@ -47,6 +47,6 @@
             @endforeach
         </tbody>
     </table>
-    <p class="small">Generated on {{ now()->format('Y-m-d H:i') }}</p>
+    <p class="small">Generated on {{ now()->format('j/n/Y g:i:s A') }}</p>
 </body>
 </html>
