@@ -12,20 +12,20 @@
         .fc-grid { display: grid; gap: 1px; }
         .fc-grid-cols-7 { grid-template-columns: repeat(7, 1fr); }
         .fc-grid-cols-1 { grid-template-columns: 1fr; }
-        
+
         .fc-day-header { background-color: #f9fafb; padding: 0.5rem; text-align: center; font-size: 0.875rem; font-weight: 600; color: #374151; }
-        
+
         .fc-day { background-color: white; padding: 0.5rem; position: relative; display: flex; flex-direction: column; }
         .fc-day:hover { background-color: #f9fafb; }
         .fc-day-other { background-color: #f9fafb; color: #9ca3af; }
-        
+
         .fc-day-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
         .fc-date-num { font-size: 0.875rem; font-weight: 500; width: 1.75rem; height: 1.75rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; color: #374151; }
         .fc-date-num.today { background-color: #d97706; color: white; }
-        
+
         .fc-add-btn { font-size: 0.75rem; color: #d97706; background-color: #fffbeb; padding: 0.125rem 0.5rem; border-radius: 0.25rem; border: none; cursor: pointer; font-weight: 500; opacity: 0; transition: opacity 0.2s; }
         .fc-day:hover .fc-add-btn { opacity: 1; }
-        
+
         .fc-events-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem; }
         .fc-event-item { font-size: 0.75rem; padding: 0.25rem 0.375rem; border-radius: 0.25rem; background-color: #fffbeb; color: #b45309; border-left: 2px solid #f59e0b; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; white-space: nowrap; overflow: hidden; }
         .fc-event-item:hover { opacity: 0.8; }
@@ -53,7 +53,7 @@
     </style>
 
     <div class="fi-section p-6 bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 rounded-xl">
-        
+
         {{-- Header --}}
         <div class="fc-header">
             <div class="flex items-center gap-2">
@@ -65,8 +65,14 @@
                     @endif
                 </h2>
             </div>
-            
+
             <div class="fc-actions">
+                <input
+                    type="date"
+                    wire:model.lazy="searchDate"
+                    class="fi-input block rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm px-3 py-2"
+                    title="Chagua tarehe"
+                />
                 <x-filament::button color="success" size="sm" wire:click="mountAction('importEvents')">
                     Import
                 </x-filament::button>
@@ -96,7 +102,7 @@
         {{-- Calendar Grid --}}
         <div class="fc-grid-wrapper">
             <div class="fc-grid {{ $viewType === 'day' ? 'fc-grid-cols-1' : 'fc-grid-cols-7' }}">
-                
+
                 {{-- Days Header --}}
                 @if($viewType !== 'day')
                     @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
@@ -115,7 +121,7 @@
                         $hasEvents = $events->isNotEmpty();
                     @endphp
 
-                    <div 
+                    <div
                         class="fc-day {{ $viewType === 'month' && !$isCurrentMonth ? 'fc-day-other' : '' }}"
                         style="min-height: {{ $viewType === 'month' ? '120px' : ($viewType === 'week' ? '300px' : '500px') }}"
                     >
@@ -129,9 +135,9 @@
                                     <span style="font-size: 1.125rem; font-weight: 600; color: inherit;">{{ $day->format('l') }}</span>
                                 @endif
                             </div>
-                            
+
                             {{-- Add Button --}}
-                            <button 
+                            <button
                                 wire:click="mountAction('createEvent', { start_time: '{{ $day->toDateTimeString() }}' })"
                                 class="fc-add-btn"
                                 style="{{ $viewType !== 'month' ? 'opacity: 1' : '' }}"
@@ -143,7 +149,7 @@
                         {{-- Events List --}}
                         <div class="fc-events-list">
                             @foreach($events as $event)
-                                <div 
+                                <div
                                     wire:click="mountAction('viewEvent', { id: {{ $event->id }} })"
                                     class="fc-event-item"
                                     title="{{ $event->title }}"
@@ -152,7 +158,7 @@
                                     <span class="fc-event-title">{{ $event->title }}</span>
                                 </div>
                             @endforeach
-                            
+
                             @if(!$hasEvents)
                                 <div class="fc-empty-text">
                                     {{ $viewType === 'day' ? 'No events scheduled.' : 'Open' }}
@@ -163,7 +169,7 @@
                 @endforeach
             </div>
         </div>
-        
+
         <x-filament-actions::modals />
     </div>
 </x-filament-widgets::widget>

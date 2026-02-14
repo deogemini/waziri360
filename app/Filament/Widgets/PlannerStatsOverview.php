@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Booking;
 use App\Models\Deliverable;
 use App\Models\Event;
 use Carbon\Carbon;
@@ -21,9 +20,6 @@ class PlannerStatsOverview extends BaseWidget
         $nextMonthStart = $startOfMonth->copy()->addMonth();
         $nextMonthEnd = $endOfMonth->copy()->addMonth();
 
-        $bookingsCurrentMonth = Booking::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
-        $bookingsNextMonth = Booking::whereBetween('requested_date', [$nextMonthStart, $nextMonthEnd])->count();
-
         $eventsToday = Event::whereDate('start_time', $today)->count();
 
         $attendeesJoinedToday = DB::table('event_user')
@@ -37,16 +33,6 @@ class PlannerStatsOverview extends BaseWidget
         $deliverablesPendingToday = $deliverablesDueToday - $deliverablesCompletedToday;
 
         return [
-            Stat::make('Bookings (This Month)', (string) $bookingsCurrentMonth)
-                ->description($bookingsCurrentMonth === 0 ? 'No bookings in current month' : 'New requests this month')
-                ->icon('heroicon-o-calendar-days')
-                ->color($bookingsCurrentMonth === 0 ? 'gray' : 'primary'),
-
-            Stat::make('Bookings (Next Month)', (string) $bookingsNextMonth)
-                ->description($bookingsNextMonth === 0 ? 'No scheduled for next month' : 'By requested date')
-                ->icon('heroicon-o-forward')
-                ->color($bookingsNextMonth === 0 ? 'gray' : 'info'),
-
             Stat::make('Today’s Events', (string) $eventsToday)
                 ->description($eventsToday === 0 ? 'No events scheduled today' : 'Planner activity for today')
                 ->icon('heroicon-o-calendar')

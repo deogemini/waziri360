@@ -25,6 +25,7 @@ class CalendarWidget extends Widget implements HasForms, HasActions
 
     public string $currentDate;
     public string $viewType = 'month'; // 'month', 'week', 'day'
+    public string $searchDate = '';
 
     protected ?Collection $events = null;
 
@@ -49,6 +50,7 @@ class CalendarWidget extends Widget implements HasForms, HasActions
         };
 
         $this->currentDate = $date->toDateString();
+        $this->events = null;
     }
 
     public function previous(): void
@@ -62,16 +64,19 @@ class CalendarWidget extends Widget implements HasForms, HasActions
         };
 
         $this->currentDate = $date->toDateString();
+        $this->events = null;
     }
 
     public function today(): void
     {
         $this->currentDate = now()->toDateString();
+        $this->events = null;
     }
 
     public function setViewType(string $type): void
     {
         $this->viewType = $type;
+        $this->events = null;
     }
 
     public function getDaysProperty(): array
@@ -130,6 +135,15 @@ class CalendarWidget extends Widget implements HasForms, HasActions
         return $this->getEvents()->filter(function ($event) use ($date) {
             return $event->start_time->isSameDay($date);
         });
+    }
+
+    public function updatedSearchDate($value): void
+    {
+        if ($value) {
+            $this->currentDate = Carbon::parse($value)->toDateString();
+            $this->viewType = 'day';
+            $this->events = null;
+        }
     }
 
     public function createEventAction(): Action
@@ -225,11 +239,11 @@ class CalendarWidget extends Widget implements HasForms, HasActions
                 if (($handle = fopen($path, "r")) !== FALSE) {
                     // Skip header
                     fgetcsv($handle, 1000, ",");
-                    
+
                     while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
                         // Expected: Title, Description, Start Time, End Time, Category, Location
-                        if (count($row) < 5) continue; 
-                        
+                        if (count($row) < 5) continue;
+
                         $categoryName = $row[4] ?? 'General';
                         $category = \App\Models\Category::firstOrCreate(
                             ['name' => $categoryName],
@@ -252,12 +266,12 @@ class CalendarWidget extends Widget implements HasForms, HasActions
                     }
                     fclose($handle);
                 }
-                
+
                 \Filament\Notifications\Notification::make()
                     ->title('Events imported successfully')
                     ->success()
                     ->send();
-                
+
                 // Cleanup
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($file);
             });
