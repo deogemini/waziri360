@@ -72,7 +72,7 @@ new class extends Component
                     {{ $minister->title ?? 'Minister of Waziri wa Nchi Ofisi ya Waziri Mkuu Kazi, Ajira na Mahusiano' }}
                 </p>
                 <p class="text-lg text-blue-100">
-                    Streamlining schedules and engagements for efficient governance.
+                    Streamlining Schedules and Engagements for Efficient Governance.
                 </p>
             </div>
             <div class="md:w-1/2 flex justify-center">
