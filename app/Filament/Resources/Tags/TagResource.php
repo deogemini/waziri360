@@ -19,9 +19,9 @@ class TagResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationLabel = 'Tags';
-    protected static ?string $modelLabel = 'Tag';
-    protected static ?string $pluralModelLabel = 'Tags';
+    protected static ?string $navigationLabel = 'Themes';
+    protected static ?string $modelLabel = 'Theme';
+    protected static ?string $pluralModelLabel = 'Themes';
 
     public static function form(Schema $schema): Schema
     {
