@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('constituency_activities', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('activity_type')->nullable();
+            $table->date('date')->nullable();
+            $table->string('district')->nullable();
+            $table->string('ward')->nullable();
+            $table->string('village')->nullable();
+            $table->text('description')->nullable();
+            $table->text('key_participants')->nullable();
+            $table->text('outcomes')->nullable();
+            $table->string('attachment_path')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('constituency_activities');
+    }
+};
