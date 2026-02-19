@@ -44,7 +44,7 @@ class PlannerStatsOverview extends BaseWidget
                 ->color($attendeesJoinedToday === 0 ? 'gray' : 'success'),
 
             Stat::make('Deliverables Due Today', (string) $deliverablesDueToday)
-                ->description($deliverablesDueToday === 0 ? 'No deliverables due today' : $deliverablesCompletedToday . ' completed • ' . $deliverablesPendingToday . ' pending')
+                ->description($deliverablesDueToday === 0 ? 'No deliverables due today' : $deliverablesCompletedToday.' completed • '.$deliverablesPendingToday.' pending')
                 ->icon('heroicon-o-clipboard-document-check')
                 ->color($deliverablesPendingToday > 0 ? 'danger' : ($deliverablesDueToday === 0 ? 'gray' : 'success')),
         ];

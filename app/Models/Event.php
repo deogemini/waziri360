@@ -13,6 +13,7 @@ class Event extends Model
         'end_time',
         'category_id',
         'location',
+        'attendees_manual',
         'is_recurring',
         'recurrence_pattern',
         'successes',

@@ -4,35 +4,33 @@ namespace App\Filament\Resources\Events;
 
 use App\Filament\Resources\Events\Pages\ManageEvents;
 use App\Models\Event;
+use App\Models\MinisterProfile;
 use BackedEnum;
+use Dompdf\Dompdf;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Dompdf\Dompdf;
-use Illuminate\Support\Facades\View;
-use App\Models\MinisterProfile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EventResource extends Resource
 {
@@ -78,12 +76,10 @@ class EventResource extends Resource
 
                 Section::make('Attendees')
                     ->schema([
-                        Select::make('attendees')
-                            ->relationship('attendees', 'name')
-                            ->multiple()
-                            ->searchable()
-                            ->preload()
-                            ->label('Select Attendees'),
+                        Textarea::make('attendees_manual')
+                            ->label('Attendees')
+                            ->placeholder('Enter attendee names, separated by commas or new lines')
+                            ->rows(3),
                     ]),
 
                 Section::make('Documents')
@@ -209,8 +205,8 @@ class EventResource extends Resource
                         $photoPath = null;
                         if ($minister && $minister->photo_path) {
                             $relative = ltrim($minister->photo_path, '\\/');
-                            $publicAbsolute = storage_path('app/public/' . $relative);
-                            $privateAbsolute = storage_path('app/private/' . $relative);
+                            $publicAbsolute = storage_path('app/public/'.$relative);
+                            $privateAbsolute = storage_path('app/private/'.$relative);
                             if (is_file($publicAbsolute)) {
                                 $photoPath = $publicAbsolute;
                             } elseif (is_file($privateAbsolute)) {
@@ -223,7 +219,7 @@ class EventResource extends Resource
                             if (function_exists('mime_content_type')) {
                                 $mime = @mime_content_type($photoPath) ?: null;
                             }
-                            if (!$mime) {
+                            if (! $mime) {
                                 $ext = strtolower(pathinfo($photoPath, PATHINFO_EXTENSION));
                                 $mime = match ($ext) {
                                     'png' => 'image/png',
@@ -234,9 +230,9 @@ class EventResource extends Resource
                             }
                             $data = @file_get_contents($photoPath);
                             if ($data !== false) {
-                                $photoUrl = 'data:' . $mime . ';base64,' . base64_encode($data);
+                                $photoUrl = 'data:'.$mime.';base64,'.base64_encode($data);
                             } else {
-                                $photoUrl = 'file:///' . str_replace('\\', '/', $photoPath);
+                                $photoUrl = 'file:///'.str_replace('\\', '/', $photoPath);
                             }
                         }
 
@@ -247,14 +243,17 @@ class EventResource extends Resource
                         ])->render();
 
                         $dompdf = class_exists('Dompdf\\Options')
-                            ? new Dompdf(tap(new \Dompdf\Options(), function ($o) { $o->set('isRemoteEnabled', true); }))
-                            : new Dompdf();
+                            ? new Dompdf(tap(new \Dompdf\Options, function ($o) {
+                                $o->set('isRemoteEnabled', true);
+                            }))
+                            : new Dompdf;
                         if (method_exists($dompdf, 'set_option')) {
                             $dompdf->set_option('isRemoteEnabled', true);
                         }
                         $dompdf->loadHtml($html);
                         $dompdf->setPaper('a4', 'portrait');
                         $dompdf->render();
+
                         return response()->streamDownload(
                             function () use ($dompdf) {
                                 echo $dompdf->output();
@@ -272,25 +271,26 @@ class EventResource extends Resource
                         $deliverablesTotal = $record->deliverables()->count();
                         $deliverablesCompleted = $record->deliverables()->where('status', 'completed')->count();
                         $tags = $record->tags()->pluck('name')->implode(', ');
-                        $attendees = $record->attendees()->pluck('name')->implode(', ');
+                        $attendees = $record->attendees_manual ?: $record->attendees()->pluck('name')->implode(', ');
                         $html = '<html><head><meta charset="UTF-8"><title>Event Summary</title></head><body>';
-                        $html .= '<h1>' . e($record->title) . '</h1>';
-                        $html .= '<p><strong>Category:</strong> ' . e($record->category->name) . '</p>';
-                        $html .= '<p><strong>Themes:</strong> ' . e($tags) . '</p>';
-                        $html .= '<p><strong>Location:</strong> ' . e($record->location) . '</p>';
-                        $html .= '<p><strong>Schedule:</strong> ' . $record->start_time->toDateTimeString() . ' — ' . $record->end_time->toDateTimeString() . '</p>';
-                        $html .= '<p><strong>Attendees:</strong> ' . e($attendees) . '</p>';
+                        $html .= '<h1>'.e($record->title).'</h1>';
+                        $html .= '<p><strong>Category:</strong> '.e($record->category->name).'</p>';
+                        $html .= '<p><strong>Themes:</strong> '.e($tags).'</p>';
+                        $html .= '<p><strong>Location:</strong> '.e($record->location).'</p>';
+                        $html .= '<p><strong>Schedule:</strong> '.$record->start_time->toDateTimeString().' — '.$record->end_time->toDateTimeString().'</p>';
+                        $html .= '<p><strong>Attendees:</strong> '.e($attendees).'</p>';
                         $html .= '<h2>Deliverables</h2>';
-                        $html .= '<p>' . $deliverablesCompleted . ' of ' . $deliverablesTotal . ' completed</p>';
-                        $html .= '<h2>Successes</h2><p>' . nl2br(e($record->successes)) . '</p>';
-                        $html .= '<h2>Challenges</h2><p>' . nl2br(e($record->challenges)) . '</p>';
-                        $html .= '<h2>Next Steps</h2><p>' . nl2br(e($record->next_steps)) . '</p>';
+                        $html .= '<p>'.$deliverablesCompleted.' of '.$deliverablesTotal.' completed</p>';
+                        $html .= '<h2>Successes</h2><p>'.nl2br(e($record->successes)).'</p>';
+                        $html .= '<h2>Challenges</h2><p>'.nl2br(e($record->challenges)).'</p>';
+                        $html .= '<h2>Next Steps</h2><p>'.nl2br(e($record->next_steps)).'</p>';
                         $html .= '</body></html>';
                         $response = new StreamedResponse(function () use ($html) {
                             echo $html;
                         });
                         $response->headers->set('Content-Type', 'text/html; charset=UTF-8');
                         $response->headers->set('Content-Disposition', 'attachment; filename="event_summary.html"');
+
                         return $response;
                     }),
                 DeleteAction::make(),
@@ -335,8 +335,8 @@ class EventResource extends Resource
                         $photoPath = null;
                         if ($minister && $minister->photo_path) {
                             $relative = ltrim($minister->photo_path, '\\/');
-                            $publicAbsolute = storage_path('app/public/' . $relative);
-                            $privateAbsolute = storage_path('app/private/' . $relative);
+                            $publicAbsolute = storage_path('app/public/'.$relative);
+                            $privateAbsolute = storage_path('app/private/'.$relative);
                             if (is_file($publicAbsolute)) {
                                 $photoPath = $publicAbsolute;
                             } elseif (is_file($privateAbsolute)) {
@@ -349,7 +349,7 @@ class EventResource extends Resource
                             if (function_exists('mime_content_type')) {
                                 $mime = @mime_content_type($photoPath) ?: null;
                             }
-                            if (!$mime) {
+                            if (! $mime) {
                                 $ext = strtolower(pathinfo($photoPath, PATHINFO_EXTENSION));
                                 $mime = match ($ext) {
                                     'png' => 'image/png',
@@ -360,9 +360,9 @@ class EventResource extends Resource
                             }
                             $data = @file_get_contents($photoPath);
                             if ($data !== false) {
-                                $photoUrl = 'data:' . $mime . ';base64,' . base64_encode($data);
+                                $photoUrl = 'data:'.$mime.';base64,'.base64_encode($data);
                             } else {
-                                $photoUrl = 'file:///' . str_replace('\\', '/', $photoPath);
+                                $photoUrl = 'file:///'.str_replace('\\', '/', $photoPath);
                             }
                         }
 
@@ -373,14 +373,17 @@ class EventResource extends Resource
                         ])->render();
 
                         $dompdf = class_exists('Dompdf\\Options')
-                            ? new Dompdf(tap(new \Dompdf\Options(), function ($o) { $o->set('isRemoteEnabled', true); }))
-                            : new Dompdf();
+                            ? new Dompdf(tap(new \Dompdf\Options, function ($o) {
+                                $o->set('isRemoteEnabled', true);
+                            }))
+                            : new Dompdf;
                         if (method_exists($dompdf, 'set_option')) {
                             $dompdf->set_option('isRemoteEnabled', true);
                         }
                         $dompdf->loadHtml($html);
                         $dompdf->setPaper('a4', 'portrait');
                         $dompdf->render();
+
                         return response()->streamDownload(
                             function () use ($dompdf) {
                                 echo $dompdf->output();

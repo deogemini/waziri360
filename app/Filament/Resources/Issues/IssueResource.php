@@ -14,24 +14,21 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class IssueResource extends Resource
 {
     protected static ?string $model = Issue::class;
 
-        protected static bool $shouldRegisterNavigation = true;
-
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-exclamation-triangle';
 
@@ -125,7 +122,7 @@ class IssueResource extends Resource
                     ->label('Escalate')
                     ->icon('heroicon-o-arrow-up-right')
                     ->requiresConfirmation()
-                    ->visible(fn (Issue $record) => !$record->escalated && $record->status !== 'completed' && ($record->due_date?->isPast() ?? false))
+                    ->visible(fn (Issue $record) => ! $record->escalated && $record->status !== 'completed' && ($record->due_date?->isPast() ?? false))
                     ->form([
                         Textarea::make('reason')->label('Escalation Reason')->required(),
                     ])

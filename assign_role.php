@@ -18,8 +18,8 @@ if (Role::count() == 0) {
 $user = User::where('email', 'admin@example.com')->first();
 
 if ($user) {
-    echo "Found user: " . $user->name . "\n";
-    if (!$user->hasRole('super_admin')) {
+    echo 'Found user: '.$user->name."\n";
+    if (! $user->hasRole('super_admin')) {
         $user->assignRole('super_admin');
         echo "Assigned super_admin role to user.\n";
     } else {

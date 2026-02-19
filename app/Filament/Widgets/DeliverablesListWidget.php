@@ -11,7 +11,7 @@ class DeliverablesListWidget extends BaseWidget
 {
     protected static ?string $heading = 'Deliverables';
 
-    protected int | string | array $columnSpan = [
+    protected int|string|array $columnSpan = [
         'md' => '1/3',
         'xl' => '1/4',
     ];

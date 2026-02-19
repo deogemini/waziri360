@@ -5,21 +5,19 @@ namespace App\Filament\Resources\Bookings;
 use App\Filament\Resources\Bookings\Pages\ManageBookings;
 use App\Models\Booking;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-
-use Filament\Forms\Components\Select;
-use Filament\Actions\Action;
 
 class BookingResource extends Resource
 {
@@ -119,13 +117,17 @@ class BookingResource extends Resource
                         ->requiresConfirmation()
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
                             foreach ($records as $booking) {
-                                if ($booking->status !== 'approved') continue;
+                                if ($booking->status !== 'approved') {
+                                    continue;
+                                }
 
                                 $exists = \App\Models\Event::where('start_time', $booking->requested_date)
-                                    ->where('title', 'Meeting: ' . $booking->name)
+                                    ->where('title', 'Meeting: '.$booking->name)
                                     ->exists();
 
-                                if ($exists) continue;
+                                if ($exists) {
+                                    continue;
+                                }
 
                                 $category = \App\Models\Category::firstOrCreate(
                                     ['name' => 'Appointments'],
@@ -133,8 +135,8 @@ class BookingResource extends Resource
                                 );
 
                                 \App\Models\Event::create([
-                                    'title' => 'Meeting: ' . $booking->name,
-                                    'description' => $booking->purpose . "\n\nContact: " . $booking->phone . " | " . $booking->email,
+                                    'title' => 'Meeting: '.$booking->name,
+                                    'description' => $booking->purpose."\n\nContact: ".$booking->phone.' | '.$booking->email,
                                     'start_time' => $booking->requested_date,
                                     'end_time' => $booking->requested_date->copy()->addHour(),
                                     'category_id' => $category->id,

@@ -5,26 +5,29 @@ namespace App\Filament\Widgets;
 use App\Models\Event;
 use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
-use Filament\Widgets\Widget;
 use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Actions\Contracts\HasActions;
+use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
 
-class CalendarWidget extends Widget implements HasForms, HasActions
+class CalendarWidget extends Widget implements HasActions, HasForms
 {
-    use InteractsWithForms;
     use InteractsWithActions;
+    use InteractsWithForms;
 
     protected string $view = 'filament.widgets.calendar-widget';
-    protected int | string | array $columnSpan = 'full';
+
+    protected int|string|array $columnSpan = 'full';
 
     public string $currentDate;
+
     public string $viewType = 'month'; // 'month', 'week', 'day'
+
     public string $searchDate = '';
 
     protected ?Collection $events = null;
@@ -236,13 +239,15 @@ class CalendarWidget extends Widget implements HasForms, HasActions
                 $file = $data['attachment'];
                 $path = \Illuminate\Support\Facades\Storage::disk('public')->path($file);
 
-                if (($handle = fopen($path, "r")) !== FALSE) {
+                if (($handle = fopen($path, 'r')) !== false) {
                     // Skip header
-                    fgetcsv($handle, 1000, ",");
+                    fgetcsv($handle, 1000, ',');
 
-                    while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                    while (($row = fgetcsv($handle, 1000, ',')) !== false) {
                         // Expected: Title, Description, Start Time, End Time, Category, Location
-                        if (count($row) < 5) continue;
+                        if (count($row) < 5) {
+                            continue;
+                        }
 
                         $categoryName = $row[4] ?? 'General';
                         $category = \App\Models\Category::firstOrCreate(

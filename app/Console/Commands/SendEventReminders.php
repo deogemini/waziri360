@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-
 use App\Models\Event;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class SendEventReminders extends Command
 {
@@ -35,7 +34,7 @@ class SendEventReminders extends Command
         foreach ($events as $event) {
             $this->info("Sending reminder for: {$event->title}");
             Log::info("Reminder sent for event: {$event->title}");
-            
+
             // Logic to send Email/SMS to attendees
             // Mail::to($event->attendees)->send(new EventReminder($event));
         }

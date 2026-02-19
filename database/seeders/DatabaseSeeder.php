@@ -2,13 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Tag;
 use App\Models\Setting;
+use App\Models\User;
 use App\Models\User as ModelsUser;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\TagSeeder;
 
 class DatabaseSeeder extends Seeder
 {

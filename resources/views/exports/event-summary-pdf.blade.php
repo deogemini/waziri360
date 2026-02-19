@@ -30,7 +30,7 @@
         <p><strong>Category:</strong> {{ $event->category?->name }}</p>
         <p><strong>Schedule:</strong> {{ $event->start_time?->format('j/n/Y g:i:s A') }} — {{ $event->end_time?->format('j/n/Y g:i:s A') }}</p>
         <p><strong>Location:</strong> {{ $event->location }}</p>
-        <p><strong>Attendees:</strong> {{ $event->attendees?->pluck('name')->implode(', ') }}</p>
+        <p><strong>Attendees:</strong> {{ $event->attendees_manual ?: $event->attendees?->pluck('name')->implode(', ') }}</p>
     </div>
     <h2>Description</h2>
     <p>{{ $event->description }}</p>

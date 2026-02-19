@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Permission\Models\Role;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class RolePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
@@ -66,5 +66,4 @@ class RolePolicy
     {
         return method_exists($authUser, 'hasRole') ? ($authUser->hasRole('super_admin') || ($authUser->role ?? null) === 'admin') : (($authUser->role ?? null) === 'admin');
     }
-
 }
