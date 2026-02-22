@@ -53,5 +53,8 @@ class RolesAndPermissionsSeeder extends Seeder
         if ($admin) {
             $admin->assignRole('super_admin');
         }
+
+        $kwelaViewer = Role::firstOrCreate(['name' => 'kwela_viewer', 'guard_name' => 'web']);
+        $kwelaViewer->givePermissionTo(['View:KwelaStatsOverview']);
     }
 }

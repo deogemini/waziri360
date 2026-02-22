@@ -20,6 +20,15 @@ class CalendarWidget extends Widget implements HasActions, HasForms
     use InteractsWithActions;
     use InteractsWithForms;
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return false;
+        }
+        return $user->can('View:CalendarWidget');
+    }
+
     protected string $view = 'filament.widgets.calendar-widget';
 
     protected int|string|array $columnSpan = 'full';

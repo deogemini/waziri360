@@ -18,7 +18,11 @@ class DeliverablesListWidget extends BaseWidget
 
     public static function canView(): bool
     {
-        return true;
+        $user = auth()->user();
+        if (! $user) {
+            return false;
+        }
+        return $user->can('View:DeliverablesListWidget');
     }
 
     protected function getTableQuery(): Builder

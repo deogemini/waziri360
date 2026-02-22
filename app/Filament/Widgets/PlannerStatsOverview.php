@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\DB;
 
 class PlannerStatsOverview extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return false;
+        }
+        return $user->can('View:PlannerStatsOverview');
+    }
+
     protected function getStats(): array
     {
         $now = Carbon::now();

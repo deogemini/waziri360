@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Widgets\CalendarWidget;
 use App\Filament\Widgets\PlannerStatsOverview;
+use App\Filament\Widgets\KwelaStatsOverview;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -42,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 PlannerStatsOverview::class,
+                KwelaStatsOverview::class,
                 CalendarWidget::class,
             ])
             ->middleware([

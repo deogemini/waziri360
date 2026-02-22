@@ -14,6 +14,7 @@ if (Role::count() == 0) {
     echo "Creating super_admin role...\n";
     Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
 }
+Role::firstOrCreate(['name' => 'kwela_viewer', 'guard_name' => 'web']);
 
 $user = User::where('email', 'admin@example.com')->first();
 
@@ -27,4 +28,12 @@ if ($user) {
     }
 } else {
     echo "User admin@example.com not found.\n";
+}
+
+$deputy = User::where('email', 'deputy@example.com')->first();
+if ($deputy) {
+    if (! $deputy->hasRole('kwela_viewer')) {
+        $deputy->assignRole('kwela_viewer');
+        echo "Assigned kwela_viewer role to deputy@example.com.\n";
+    }
 }
